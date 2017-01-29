@@ -13,6 +13,7 @@ For example, the code for defining a 3 layers feedforward neural network is:
 
 Where each tuple in the constructor represents a single layer (num_inputs, num_neurons).
 
+The implementation is made with python 3.
 
 ##Usage
 In a terminal run:
