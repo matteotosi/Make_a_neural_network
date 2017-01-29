@@ -22,7 +22,7 @@ In a terminal run:
 
 ``python xor_demo.py`` -> Solving the XOR problem, the simplest nonlinear problem.
 
-``python iris_demo.py`` -> Example of usage of a multi layer perceptron on the iris dataset.
+``python iris_demo.py`` -> Example of usage of a multi layer perceptron (6 layers) on the iris dataset.
 
 ##Dependencies
 
