@@ -1,26 +1,30 @@
 # Make_a_neural_network
-This is the code for the "Make a Neural Network" - Intro to Deep Learning #2 by Siraj Raval on Youtube
+This is the code for the challenge "Make a Neural Network" - Intro to Deep Learning #2 by Siraj Raval on Youtube
 
-##Overview
+##Challenge description
+The challenge for this video is to create a 3 layer feedforward neural network using only numpy as your dependency.
 
-This is the code for [this](https://youtu.be/p69khggr1Jo) video by Siraj Raval on Youtube. This is a [simple](http://computing.dcu.ie/~humphrys/Notes/Neural/single.neural.html) single layer feedforward neural network (perceptron). We use binary digits as our inputs and expect binary digits as our outputs. We'll use [backpropagation](http://neuralnetworksanddeeplearning.com/chap2.html) via gradient descent to train our network and make our prediction as accurate as possible.
+In ``demo.py`` the class ``NeuralNetwork`` of the base example has been updated with a more general implementation,
+in which it's possible to define an arbitrary number of layers.
+
+For example, the code for defining a 3 layers feedforward neural network is:
+
+``neural_network = NeuralNetwork((3, 4), (4, 4), (4, 1))``
+
+Where each tuple in the constructor represents a single layer (num_inputs, num_neurons).
+
+
+##Usage
+In a terminal run:
+
+``python demo.py`` -> 3 layer neural network in action on the same original example.
+
+``python xor_demo.py`` -> Solving the XOR problem, the simplest nonlinear problem.
+
+``python iris_demo.py`` -> Example of usage of a multi layer perceptron on the iris dataset.
 
 ##Dependencies
 
-None! Just numpy.
+numpy
 
-##Usage
-
-Run ``python demo.py`` in terminal to see it train, then predict.
-
-##Challenge
-
-The challenge for this video is to create a 3 layer feedforward neural network using only numpy as your dependency. By doing this, you'll understand exactly how backpropagation works and develop an intuitive understanding of neural networks, which will be useful for more the more complex nets we build in the future. Backpropagation usually involves recursively taking derivatives, but in our 1 layer demo there was no recursion so was a trivial case of backpropagation. In this challenge, there will be. Use a small binary dataset, you can define one programmatically like in this example.
-
-**Bonus -- use a larger, more interesting dataset**
-
-##Credits
-
-The credits for this code go to [Milo Harper](https://github.com/miloharper). I've merely created a wrapper to get people started.
-
-
+scikit-learn (only for the iris dataset loading)

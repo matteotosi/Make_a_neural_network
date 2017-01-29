@@ -1,16 +1,13 @@
 from numpy import exp, array, random, dot
 
 
-class NeuralNetwork():
-    def __init__(self):
+class NeuralNetwork:
+    def __init__(self, *layers):
         # Seed the random number generator, so it generates the same numbers
         # every time the program runs.
         random.seed(1)
-
-        # We model a single neuron, with 3 input connections and 1 output connection.
-        # We assign random weights to a 3 x 1 matrix, with values in the range -1 to 1
-        # and mean 0.
-        self.synaptic_weights = 2 * random.random((3, 1)) - 1
+        # Defining the layers of the Neural Network.
+        self.layers = array([2 * random.random((layer[0], layer[1])) - 1 for layer in layers])
 
     # The Sigmoid function, which describes an S shaped curve.
     # We pass the weighted sum of the inputs through this function to
@@ -27,48 +24,69 @@ class NeuralNetwork():
     # We train the neural network through a process of trial and error.
     # Adjusting the synaptic weights each time.
     def train(self, training_set_inputs, training_set_outputs, number_of_training_iterations):
-        for iteration in xrange(number_of_training_iterations):
-            # Pass the training set through our neural network (a single neuron).
-            output = self.think(training_set_inputs)
+        for iteration in range(number_of_training_iterations):
+            # Pass the training set through our neural network
+            hidden_outputs, last_output = self.think(training_set_inputs)
+            # list in which the deltas will be stored
+            deltas = list()
 
-            # Calculate the error (The difference between the desired output
-            # and the predicted output).
-            error = training_set_outputs - output
+            # Output layer delta computation
+            output_error = training_set_outputs - last_output
+            output_delta = output_error * self.__sigmoid_derivative(last_output)
+            deltas.append(output_delta)
 
-            # Multiply the error by the input and again by the gradient of the Sigmoid curve.
-            # This means less confident weights are adjusted more.
-            # This means inputs, which are zero, do not cause changes to the weights.
-            adjustment = dot(training_set_inputs.T, error * self.__sigmoid_derivative(output))
+            # Hidden layers deltas computation
+            for i in range(0, len(self.layers) - 1):  # 0 to n-1 (n = output_layer already processed)
+                # take the delta from the previous layer
+                last_delta = deltas[i]
+                # take the previous layer weights
+                previous_layer = self.layers[-(i + 1)]  # previous layer position = -(i + 1)
+                hidden_layer_error = last_delta.dot(previous_layer.T)
+                # current layer output position = -(i + 1) NOT -(i + 2) because last output is not in.
+                hidden_layer_delta = hidden_layer_error * self.__sigmoid_derivative(hidden_outputs[-(i + 1)])
+                deltas.append(hidden_layer_delta)
 
-            # Adjust the weights.
-            self.synaptic_weights += adjustment
+            # Calculate how much to adjust the weights.
+            # Adjustments_inputs = [training_set_inputs, layer_1_output, ... , layer_n-1_output].
+            adjustment_inputs = [training_set_inputs] + hidden_outputs
+            # Reversing deltas in correct order (for code simplicity).
+            deltas = deltas[::-1]
+            # Adjustment calculation for each layer.
+            adjustments = array([adjustment_inputs[i].T.dot(deltas[i]) for i in range(len(adjustment_inputs))])
+
+            # Adjust the weights. (numpy <3)
+            self.layers += adjustments
 
     # The neural network thinks.
     def think(self, inputs):
-        # Pass inputs through our neural network (our single neuron).
-        return self.__sigmoid(dot(inputs, self.synaptic_weights))
+        outputs = list()
+        outputs.append(self.__sigmoid(dot(inputs, self.layers[0])))  # first layer output
+        for i in range(1, len(self.layers)):
+            outputs.append(self.__sigmoid(dot(outputs[i - 1], self.layers[i])))  # remaining layers output
+        # return (hidden layers outputs, last layer output)
+        return outputs[:-1], outputs[-1]
 
 
 if __name__ == "__main__":
+    # Initialise a multi layer neural network. (3 layers)
+    # Each layer is represented by a tuple (num_inputs, num_neurons)
+    neural_network = NeuralNetwork((3, 4), (4, 4), (4, 1))
 
-    #Intialise a single neuron neural network.
-    neural_network = NeuralNetwork()
+    print("Random starting synaptic weights: ")
+    print(neural_network.layers)
 
-    print "Random starting synaptic weights: "
-    print neural_network.synaptic_weights
-
-    # The training set. We have 4 examples, each consisting of 3 input values
-    # and 1 output value.
+    # The training set.
     training_set_inputs = array([[0, 0, 1], [1, 1, 1], [1, 0, 1], [0, 1, 1]])
     training_set_outputs = array([[0, 1, 1, 0]]).T
 
     # Train the neural network using a training set.
     # Do it 10,000 times and make small adjustments each time.
-    neural_network.train(training_set_inputs, training_set_outputs, 10000)
+    neural_network.train(training_set_inputs, training_set_outputs, 60000)
 
-    print "New synaptic weights after training: "
-    print neural_network.synaptic_weights
+    print("New synaptic weights after training: ")
+    print(neural_network.layers)
 
     # Test the neural network with a new situation.
-    print "Considering new situation [1, 0, 0] -> ?: "
-    print neural_network.think(array([1, 0, 0]))
+    print("Considering new situation [1, 0, 0] -> ?: ")
+    _, pred = neural_network.think(array([1, 0, 0]))
+    print(pred)
